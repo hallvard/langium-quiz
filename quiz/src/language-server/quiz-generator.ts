@@ -18,13 +18,13 @@ export class QuizGenerator implements Generator {
     }
 
     generate(quiz : string | AstNode) : string | undefined {
-        let astNode = (typeof(quiz) == 'string' ? this.parser.parse(quiz).value : quiz);
+        const astNode = (typeof(quiz) == 'string' ? this.parser.parse(quiz).value : quiz);
         return (isQuiz(astNode) ? this.quiz2Html(astNode) : undefined);
     }
 
     quiz2Html(quiz : Quiz) : string {
-        let title = (quiz.title || quiz.name);
-        let html = 
+        const title = (quiz.title || quiz.name);
+        const html = 
 `<html>
     <head>
 	    <title>${title}</title>

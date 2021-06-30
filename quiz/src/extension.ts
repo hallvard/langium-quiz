@@ -17,15 +17,12 @@ let quizServices: QuizServices;
 export function activate(context: vscode.ExtensionContext): void {
     quizServices = createQuizServices();
     quizFileWatcher = workspace.createFileSystemWatcher('**/*.quiz');
-    let quizGeneratorHandler = (uri: vscode.Uri) => {
-        generateHtml(uri);
-    };
-    quizFileWatcher.onDidChange(quizGeneratorHandler);
-    quizFileWatcher.onDidCreate(quizGeneratorHandler);
+    quizFileWatcher.onDidChange((uri: vscode.Uri) => generateHtml(uri, "change"));
+    quizFileWatcher.onDidCreate((uri: vscode.Uri) => generateHtml(uri, "create"));
     client = startLanguageClient(context);
 
     context.subscriptions.push(quizFileWatcher);
-    context.subscriptions.push(commands.registerCommand('quiz.generateHtml', (uri: vscode.Uri) => {
+    context.subscriptions.push(commands.registerCommand('quiz.generateHtml', async (uri: vscode.Uri) => {
         if (! uri) {
             let documentUri = vscode.window.activeTextEditor?.document.uri;
             if (documentUri) {
@@ -33,8 +30,11 @@ export function activate(context: vscode.ExtensionContext): void {
             }
         }
         if (uri) {
-            generateHtml(uri);
+            await generateHtml(uri);
         }
+    }));
+    context.subscriptions.push(vscode.commands.registerCommand('quiz.htmlPreview', async () => {
+        await initHtmlPreview(context);
     }));
 }
 
@@ -81,12 +81,56 @@ function startLanguageClient(context: vscode.ExtensionContext): LanguageClient {
     return client;
 }
 
-function generateHtml(uri: vscode.Uri) {
-    vscode.workspace.openTextDocument(uri).then((document) => {
-        if (document.languageId == "quiz") {
-            let generator = quizServices.generation.QuizGenerator;
-            let html = generator.generate(document.getText());
-            workspace.fs.writeFile(vscode.Uri.file(uri.fsPath + ".html"), new TextEncoder().encode(html));
-        }
-    });
+const textEncoder = new TextEncoder();
+
+async function generateHtml(uri: vscode.Uri, event? : string) {
+    if (uri.scheme == "file") {
+        vscode.workspace.openTextDocument(uri).then((document) => {
+            if (document.languageId == "quiz") {
+                const generator = quizServices.generation.QuizGenerator;
+                const html = generator.generate(document.getText());
+                const quizConfig = vscode.workspace.getConfiguration('quiz');
+                const events = String(quizConfig.get("generator.workspaceEvent"));
+                if ((! event) || (! events) || events.includes(event)) {
+                    workspace.fs.writeFile(vscode.Uri.file(uri.fsPath + ".html"), textEncoder.encode(html));
+                }
+                if (document == vscode.window.activeTextEditor?.document) {
+                    updateHtmlPreview(html);
+                }
+            }
+        });
+    }
+}
+
+let previewPanel : vscode.WebviewPanel;
+
+async function initHtmlPreview(context: vscode.ExtensionContext) {
+    if (! previewPanel) {
+        previewPanel = vscode.window.createWebviewPanel(
+            // Webview id
+            'liveHTMLPreviewer',
+            // Webview title
+            '[Preview]',
+            // This will open the second column for preview inside editor
+            2,
+            {
+                // Enable scripts in the webview
+                enableScripts: true,
+                retainContextWhenHidden: true,
+                // And restrict the webview to only loading content from our extension's `assets` directory.
+                localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'assets'))]
+            }
+        );
+    }
+    const generator = quizServices.generation.QuizGenerator;
+    const text = vscode.window.activeTextEditor?.document.getText();
+    if (text) {
+        updateHtmlPreview(generator.generate(text));
+    }
+}
+
+function updateHtmlPreview(html : string | undefined) {
+    if (previewPanel && html) {
+        previewPanel.webview.html = html;
+    }
 }

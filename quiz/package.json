@@ -25,20 +25,44 @@
             "command": "quiz.generateHtml",
             "title": "Generate HTML",
             "category": "Quiz"
+        }, {
+            "command": "quiz.htmlPreview",
+            "title": "Preview HTML",
+            "category": "Quiz"
         }],
         "menus": {
             "explorer/context": [{
                 "command": "quiz.generateHtml",
                 "when": "resourceLangId == quiz"
+            }, {
+                "command": "quiz.htmlPreview",
+                "when": "resourceLangId == quiz"
             }],
             "editor/context": [{
                 "command": "quiz.generateHtml",
+                "when": "resourceLangId == quiz"
+            }, {
+                "command": "quiz.htmlPreview",
                 "when": "resourceLangId == quiz"
             }],
             "commandPalette": [{
                 "command": "quiz.generateHtml",
                 "when": "editorLangId == quiz"
+            }, {
+                "command": "quiz.htmlPreview",
+                "when": "editorLangId == quiz"
             }]
+        }
+    },
+    "configuration": {
+        "type": "object",
+        "title": "Quiz DSL",
+        "properties": {
+            "quiz.generator.workspaceEvents": {
+                "type": "string",
+                "default": "create, change",
+                "description": "Workspace events that trigger the generator"
+            }
         }
     },
     "activationEvents": [
