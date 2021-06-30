@@ -1,0 +1,48 @@
+{
+  "name": "quiz",
+  "scopeName": "source.quiz",
+  "fileTypes": [
+    ".quiz"
+  ],
+  "patterns": [
+    {
+      "name": "keyword.control.quiz",
+      "match": "\\b(no|part|quiz|v|x|yes)\\b"
+    },
+    {
+      "name": "keyword.symbol.quiz",
+      "match": "(\\-|\\?|\\(|\\)|\\[|\\]|\\/|\\<<|\\=|\\>>|\\~)"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.block.quiz",
+          "begin": "/\\*",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.quiz"
+            }
+          },
+          "end": "\\*/",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.quiz"
+            }
+          }
+        },
+        {
+          "begin": "(^\\s+)?(?=//)",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.whitespace.comment.leading.cs"
+            }
+          },
+          "end": "(?=$)",
+          "name": "comment.line.quiz"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+quiz "Sample quiz"
+
+part "String questions"
+
+"What's the meaning of life?" 42
+
+"Do you agree?" yes
+
+"What is your favorite color?" (x) "Black" () "White"
+
+"Which of these are colors?" [-] "Black" [] "White" [x] "Red" [x] "Green" [v] "Blue"
+
+"Which of these colors are not part of CMYK"? -Cyan -Magenta -Yellow v Blue
+
+part "XML questions"
+
+<<p>What IT product has the following logo/icon: <img src="https://cdn.icon-icons.com/icons2/2107/PNG/512/file_type_vscode_icon_130084.png"/></p>>? [-]Theia [x]"VS Code"
